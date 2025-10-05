@@ -1,0 +1,152 @@
+---
+title: "DuckDB Notion Extension - Donut Shop Test"
+format: html
+---
+
+# Testing DuckDB Notion Extension
+
+This notebook tests the DuckDB Notion extension with the traditional donut shop database setup.
+
+## Setup
+
+Load required libraries and environment variables:
+
+```{r setup}
+#| warning: false
+#| message: false
+
+# Install packages if needed (run once)
+# install.packages("dotenv")
+# install.packages("duckdb")
+
+# Load libraries
+library(dotenv)
+library(duckdb)
+library(here)
+setwd(here::here("_notebooks"))
+
+# Load environment variables from .env file
+load_dot_env("../.env")
+
+# Get credentials
+notion_token <- Sys.getenv("NOTION_TOKEN")
+products_db <- Sys.getenv("NOTION_PRODUCTS_DB")
+orders_db <- Sys.getenv("NOTION_ORDERS_DB")
+order_items_db <- Sys.getenv("NOTION_ORDER_ITEMS_DB")
+suppliers_db <- Sys.getenv("NOTION_SUPPLIERS_DB")
+
+# Verify token is loaded
+if (notion_token == "" || notion_token == "your_actual_token_here") {
+  stop("❌ Please set your NOTION_TOKEN in the .env file!")
+} else {
+  cat("✅ Notion token loaded successfully\n")
+}
+
+# Display database IDs (for verification)
+cat("\n📊 Database IDs:\n")
+cat("Products: ", products_db, "\n")
+cat("Orders: ", orders_db, "\n")
+cat("Order Items: ", order_items_db, "\n")
+cat("Suppliers: ", suppliers_db, "\n")
+```
+
+## Connect to DuckDB
+
+```{r connect}
+# Create DuckDB connection
+con <- dbConnect(duckdb::duckdb())
+
+cat("✅ DuckDB connection established\n")
+```
+
+## Install and Load Notion Extension
+
+```{r load-extension}
+# Install the Notion extension from community (once available)
+# For now, this will fail until the extension is published
+# dbExecute(con, "INSTALL notion FROM community")
+# dbExecute(con, "LOAD notion")
+
+# For testing with local build, you would load it like this:
+# dbExecute(con, "LOAD '/path/to/notion.duckdb_extension'")
+
+# Placeholder for now
+cat("⚠️ Extension loading step - implement when extension is built\n")
+cat("For now, simulating the expected behavior...\n")
+```
+
+## Test 1: Query Products Database
+
+This is the main test - pull all products from your Notion database.
+
+```{r query-products}
+#| eval: false
+
+# Once extension is loaded, this will work:
+query <- sprintf("SELECT * FROM read_notion('%s')", products_db)
+
+# Execute query
+products <- dbGetQuery(con, query)
+
+# Display results
+print(products)
+
+# Summary
+cat("\n📊 Products Summary:\n")
+cat("Total products: ", nrow(products), "\n")
+cat("\nColumns: ", paste(names(products), collapse=", "), "\n")
+```
+
+## Expected Output
+
+When the extension works, you should see:
+
+- 6 donut products
+- Columns: name, category, price, cost, in_stock, daily_limit, calories
+- Products like: Glazed Classic, Chocolate Frosted, Jelly Filled, etc.
+
+## Simulated Test (Remove when extension works)
+
+```{r simulated}
+# Simulated data for testing the notebook structure
+simulated_products <- data.frame(
+  name = c("Glazed Classic", "Chocolate Frosted", "Jelly Filled",
+           "Boston Cream", "Pumpkin Spice", "Maple Bacon"),
+  category = c("Classic", "Classic", "Filled", "Filled", "Seasonal", "Specialty"),
+  price = c(2.50, 2.75, 3.00, 3.25, 3.50, 4.00),
+  cost = c(0.75, 0.85, 1.00, 1.20, 1.30, 1.50),
+  in_stock = c(TRUE, TRUE, TRUE, TRUE, FALSE, TRUE),
+  daily_limit = c(200, 150, 100, 80, 0, 50),
+  calories = c(250, 280, 320, 340, 310, 380)
+)
+
+print(simulated_products)
+
+# Calculate profit margins
+simulated_products$profit <- simulated_products$price - simulated_products$cost
+simulated_products$margin_pct <- round(100 * simulated_products$profit / simulated_products$price, 1)
+
+cat("\n💰 Profit Analysis:\n")
+print(simulated_products[, c("name", "price", "cost", "profit", "margin_pct")])
+```
+
+## Cleanup
+
+```{r cleanup}
+# Disconnect from DuckDB
+dbDisconnect(con, shutdown=TRUE)
+cat("✅ Disconnected from DuckDB\n")
+```
+
+## Next Steps
+
+1. ✅ Set up .env file with your Notion token
+2. ✅ Verify database IDs are correct
+3. 🔄 Build the DuckDB Notion extension
+4. 🔄 Load the extension in this notebook
+5. 🔄 Run the actual query against Notion
+6. 🔄 Verify data matches what's in Notion
+
+---
+
+**Note:** This notebook is ready to test once the DuckDB Notion extension is compiled and available!

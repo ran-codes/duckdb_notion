@@ -14,7 +14,7 @@ Create 1 Notion database with 3 data sources connected. This demonstrates the 20
 
 ---
 
-## 📋 Setup Option 1: Three Separate Databases (Traditional)
+## 📋 Setup Three Separate Databases (Traditional Notion Workflow)
 
 ### Database 1: Products 🍩
 
@@ -123,44 +123,6 @@ Row 4: Jelly King | Filling | jelly@example.com | 555-0104 | 2024-02-11 | 2024-0
 
 ---
 
-## 🔗 Setup Option 2: Multi-Source Database (Advanced)
-
-**What is a Multi-Source Database?**
-Notion's new API (2025-09-03) allows connecting multiple data sources (like Google Sheets, CSV imports, or external databases) to a single Notion database. This lets you combine data from different sources in one view.
-
-### Creating a Multi-Source Database:
-
-1. **Create the main database: "Donut Shop Operations"**
-
-2. **Add Data Source 1: Products** (Manual/Notion data)
-   - Name, Category, Price, Cost, In Stock, Daily Limit, Calories
-   - Add the same sample product data as above
-
-3. **Add Data Source 2: Orders** (Could be CSV import or external source)
-   - In Notion, click "..." → "Add data source" → Choose source type
-   - Map columns: Order ID, Product, Quantity, Customer Name, etc.
-
-4. **Add Data Source 3: Suppliers** (Could be Google Sheets sync)
-   - Add another data source with supplier information
-   - Map columns accordingly
-
-### Multi-Source Testing:
-
-```sql
--- The extension automatically detects and handles multiple data sources
--- You don't need to specify data_source_id - it's handled internally
-
-SELECT * FROM read_notion('multi_source_database_id');
-
--- Extension will:
--- 1. Detect multiple data sources
--- 2. Query each source
--- 3. Combine results automatically
-```
-
-**Note:** Multi-source setup is more complex. For initial testing, use **Setup Option 1** (three separate databases).
-
----
 
 ## Step-by-Step Testing
 
