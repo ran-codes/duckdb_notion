@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DuckDB Notion Extension</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>🦆 DuckDB Notion</h1>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#home" class="active">Home</a></li>
+            <li><a href="#install">Install</a></li>
+            <li><a href="#authentication">Authentication</a></li>
+            <li><a href="#reading">Reading</a></li>
+            <li><a href="#writing">Writing</a></li>
+            <li><a href="#examples">Examples</a></li>
+            <li><a href="#limitations">Limitations</a></li>
+        </ul>
+        <div class="footer">
+            <a href="https://github.com/yourusername/duckdb_notion" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main class="content">
+        <section id="home" class="section active">
+            <div class="hero">
+                <h1>DuckDB Notion Extension</h1>
+                <p class="subtitle">Query and modify Notion databases using SQL</p>
+                <div class="status-badge">🚧 Experimental 🚧</div>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <h3>📖 Read Notion Databases</h3>
+                    <p>Query your Notion databases using familiar SQL syntax</p>
+                </div>
+                <div class="feature-card">
+                    <h3>✍️ Write Data</h3>
+                    <p>Push data from DuckDB directly into Notion databases</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔐 Secure Authentication</h3>
+                    <p>Token-based auth via environment variables or DuckDB secrets</p>
+                </div>
+            </div>
+
+            <div class="quick-start">
+                <h2>Quick Start</h2>
+                <pre><code>-- Install the extension
+INSTALL notion FROM community;
+LOAD notion;
+
+-- Read from a Notion database
+SELECT * FROM read_notion('database_id');</code></pre>
+            </div>
+        </section>
+
+        <section id="install" class="section">
+            <h1>Installation</h1>
+
+            <h2>From Community Extensions</h2>
+            <pre><code>INSTALL notion FROM community;
+LOAD notion;</code></pre>
+
+            <h2>Requirements</h2>
+            <ul>
+                <li>DuckDB version 1.0.0 or higher</li>
+                <li>Active Notion integration with API access</li>
+            </ul>
+
+            <h2>Building from Source</h2>
+            <pre><code>git clone https://github.com/yourusername/duckdb_notion.git
+cd duckdb_notion
+mkdir build && cd build
+cmake ..
+make
+make install</code></pre>
+        </section>
+
+        <section id="authentication" class="section">
+            <h1>Authentication</h1>
+
+            <h2>Getting a Notion Integration Token</h2>
+            <ol>
+                <li>Go to <a href="https://www.notion.so/my-integrations" target="_blank">https://www.notion.so/my-integrations</a></li>
+                <li>Click "+ New integration"</li>
+                <li>Give it a name and select the capabilities you need</li>
+                <li>Copy the "Internal Integration Token"</li>
+                <li>Share your database with the integration</li>
+            </ol>
+
+            <h2>Method 1: Environment Variable</h2>
+            <pre><code>export NOTION_TOKEN="secret_your_token_here"</code></pre>
+
+            <h2>Method 2: DuckDB Secret</h2>
+            <pre><code>CREATE SECRET notion_secret (
+    TYPE notion,
+    token 'secret_your_token_here'
+);</code></pre>
+
+            <div class="info-box">
+                <strong>Note:</strong> The integration must be explicitly shared with each database you want to access.
+            </div>
+        </section>
+
+        <section id="reading" class="section">
+            <h1>Reading from Notion</h1>
+
+            <h2>Basic Usage</h2>
+            <pre><code>-- Using database ID
+SELECT * FROM read_notion('abc123def456...');
+
+-- Using full URL
+SELECT * FROM read_notion('https://www.notion.so/workspace/abc123...');</code></pre>
+
+            <h2>Supported Property Types</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Notion Type</th>
+                        <th>DuckDB Type</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Title</td>
+                        <td>VARCHAR</td>
+                        <td>'My Page Title'</td>
+                    </tr>
+                    <tr>
+                        <td>Rich Text</td>
+                        <td>VARCHAR</td>
+                        <td>'Some text content'</td>
+                    </tr>
+                    <tr>
+                        <td>Number</td>
+                        <td>DOUBLE</td>
+                        <td>42.5</td>
+                    </tr>
+                    <tr>
+                        <td>Checkbox</td>
+                        <td>BOOLEAN</td>
+                        <td>true</td>
+                    </tr>
+                    <tr>
+                        <td>Select</td>
+                        <td>VARCHAR</td>
+                        <td>'Option A'</td>
+                    </tr>
+                    <tr>
+                        <td>URL</td>
+                        <td>VARCHAR</td>
+                        <td>'https://example.com'</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Filtering and Aggregation</h2>
+            <pre><code>-- Count items by status
+SELECT status, COUNT(*) as count
+FROM read_notion('database_id')
+GROUP BY status;
+
+-- Filter active items
+SELECT * FROM read_notion('database_id')
+WHERE active = true;</code></pre>
+        </section>
+
+        <section id="writing" class="section">
+            <h1>Writing to Notion</h1>
+
+            <h2>Basic COPY Operation</h2>
+            <pre><code>-- Create and populate a table
+CREATE TABLE tasks (
+    name VARCHAR,
+    priority INTEGER,
+    completed BOOLEAN
+);
+
+INSERT INTO tasks VALUES
+    ('Complete documentation', 1, false),
+    ('Review code', 2, false),
+    ('Deploy to production', 3, false);
+
+-- Copy to Notion
+COPY tasks TO 'database_id' (FORMAT notion);</code></pre>
+
+            <h2>Type Mapping</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>DuckDB Type</th>
+                        <th>Notion Type</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>VARCHAR (first column)</td>
+                        <td>Title</td>
+                        <td>First column becomes title property</td>
+                    </tr>
+                    <tr>
+                        <td>VARCHAR</td>
+                        <td>Rich Text</td>
+                        <td>Other VARCHAR columns</td>
+                    </tr>
+                    <tr>
+                        <td>INTEGER/BIGINT</td>
+                        <td>Number</td>
+                        <td>Whole numbers</td>
+                    </tr>
+                    <tr>
+                        <td>DOUBLE/FLOAT</td>
+                        <td>Number</td>
+                        <td>Decimal numbers</td>
+                    </tr>
+                    <tr>
+                        <td>BOOLEAN</td>
+                        <td>Checkbox</td>
+                        <td>True/False values</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="examples" class="section">
+            <h1>Examples</h1>
+
+            <h2>Example 1: Task Management Analysis</h2>
+            <pre><code>-- Load the extension
+LOAD notion;
+
+-- Analyze task completion rates
+SELECT
+    status,
+    COUNT(*) as total_tasks,
+    SUM(CASE WHEN completed THEN 1 ELSE 0 END) as completed_tasks,
+    ROUND(100.0 * SUM(CASE WHEN completed THEN 1 ELSE 0 END) / COUNT(*), 2) as completion_rate
+FROM read_notion('your_task_database_id')
+GROUP BY status
+ORDER BY completion_rate DESC;</code></pre>
+
+            <h2>Example 2: Syncing CSV to Notion</h2>
+            <pre><code>-- Import CSV data
+CREATE TABLE contacts AS
+SELECT * FROM read_csv('contacts.csv');
+
+-- Transform and write to Notion
+COPY (
+    SELECT
+        name,
+        email,
+        phone,
+        CASE WHEN status = 'active' THEN true ELSE false END as is_active
+    FROM contacts
+) TO 'notion_contacts_db_id' (FORMAT notion);</code></pre>
+
+            <h2>Example 3: Joining Notion with Local Data</h2>
+            <pre><code>-- Join Notion database with local analytics
+SELECT
+    n.project_name,
+    n.status,
+    a.revenue,
+    a.costs,
+    (a.revenue - a.costs) as profit
+FROM read_notion('projects_db_id') n
+LEFT JOIN analytics a ON n.project_id = a.id
+WHERE n.status = 'Active'
+ORDER BY profit DESC;</code></pre>
+
+            <h2>Example 4: Creating Weekly Reports</h2>
+            <pre><code>-- Aggregate weekly data and push to Notion
+COPY (
+    SELECT
+        DATE_TRUNC('week', date) as week,
+        SUM(revenue) as total_revenue,
+        COUNT(DISTINCT customer_id) as unique_customers,
+        AVG(order_value) as avg_order_value
+    FROM orders
+    WHERE date >= CURRENT_DATE - INTERVAL 30 DAY
+    GROUP BY week
+) TO 'weekly_reports_db_id' (FORMAT notion);</code></pre>
+        </section>
+
+        <section id="limitations" class="section">
+            <h1>Limitations</h1>
+
+            <div class="warning-box">
+                <h3>⚠️ Current Limitations</h3>
+                <ul>
+                    <li><strong>JSON Parsing:</strong> Currently uses simplified JSON parsing. Consider using a proper JSON library for production use.</li>
+                    <li><strong>Property Types:</strong> Basic property type mapping. Complex types (relations, rollups, formulas) have limited support.</li>
+                    <li><strong>Write Operations:</strong> Only creates new pages. Update operations not yet supported.</li>
+                    <li><strong>Performance:</strong> Large databases may take time to query due to API rate limits and pagination.</li>
+                    <li><strong>Schema Changes:</strong> Schema is detected at bind time. Changes to Notion database structure require reconnection.</li>
+                </ul>
+            </div>
+
+            <h2>API Rate Limits</h2>
+            <p>Notion's API has rate limits. The extension does not currently implement retry logic or rate limit handling.</p>
+
+            <h2>Roadmap</h2>
+            <ul>
+                <li>Add proper JSON library integration</li>
+                <li>Support for complex property types (relations, rollups)</li>
+                <li>Implement update operations (PATCH)</li>
+                <li>Add filtering and sorting at API level</li>
+                <li>Implement retry logic and rate limit handling</li>
+                <li>Support for batch operations</li>
+            </ul>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-docusaurus:*)",
+      "Bash(tree:*)",
+      "Bash(python:*)",
+      "Bash(start http://localhost:8000)",
+      "Bash(quarto:*)",
+      "Bash(start _notebooks/01-getting-started.html)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
